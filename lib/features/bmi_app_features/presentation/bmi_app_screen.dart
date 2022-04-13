@@ -1,11 +1,20 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, unnecessary_string_interpolations, deprecated_member_use, unused_field, unused_import, avoid_types_as_parameter_names, non_constant_identifier_names, empty_statements, curly_braces_in_flow_control_structures, dead_code
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, unnecessary_string_interpolations, deprecated_member_use, unused_field, unused_import, avoid_types_as_parameter_names, non_constant_identifier_names, empty_statements, curly_braces_in_flow_control_structures, dead_code, prefer_final_fields
 
 import 'package:bmi_app/features/bmi_app_features/presentation/widgets/bmi_model.dart';
+import 'package:bmi_app/features/bmi_app_features/presentation/widgets/calculation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 
-class BmiScreen extends StatelessWidget {
-  const BmiScreen({Key? key}) : super(key: key);
+class BMIScreen extends StatefulWidget {
+  const BMIScreen({Key? key}) : super(key: key);
+
+  @override
+  State<BMIScreen> createState() => _BMIScreenState();
+}
+
+class _BMIScreenState extends State<BMIScreen> {
+
+  CalculationStore _calculation = CalculationStore();
 
   @override
   Widget build(BuildContext context) {
@@ -44,23 +53,21 @@ class BmiScreen extends StatelessWidget {
             SizedBox(
               height: 10,
             ),
-            Consumer<BMIModel>(
-              builder: ((context, BMIModel, child) {
-                return TextField(
-                  controller: BMIModel.heightController,
-                  keyboardType: TextInputType.number,
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintStyle:
-                        const TextStyle(fontSize: 15, color: Colors.white),
-                    hintText: 'Height in cm',
-                    filled: true,
-                    fillColor: Color(0xff1B1D25),
-                  ),
-                );
-              }),
-            ),
+            Observer(builder: (context) {
+              return TextField(
+                controller: _calculation.heightController,
+                keyboardType: TextInputType.number,
+                style: TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintStyle: const TextStyle(fontSize: 15, color: Colors.white),
+                  hintText: 'Height in cm',
+                  filled: true,
+                  fillColor: Color(0xff1B1D25),
+                ),
+              );
+            }),
+
             SizedBox(
               height: 20,
             ),
@@ -75,31 +82,27 @@ class BmiScreen extends StatelessWidget {
             SizedBox(
               height: 10,
             ),
-            Consumer<BMIModel>(
-              builder: ((context, BMIModel, child) {
-                return TextField(
-                  controller: BMIModel.weightController,
-                  keyboardType: TextInputType.number,
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintStyle:
-                        const TextStyle(fontSize: 15, color: Colors.white),
-                    hintText: 'Weight in kg',
-                    filled: true,
-                    fillColor: Color(0xff1B1D25),
-                  ),
-                );
-              }
-              ),
-            ),
+            Observer(builder: (context) {
+              return TextField(
+                controller: _calculation.weightController,
+                keyboardType: TextInputType.number,
+                style: TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintStyle: const TextStyle(fontSize: 15, color: Colors.white),
+                  hintText: 'Weight in kg',
+                  filled: true,
+                  fillColor: Color(0xff1B1D25),
+                ),
+              );
+            }),
             SizedBox(
               height: 30,
             ),
             SizedBox(
               width: double.infinity,
               height: 60,
-              child: RaisedButton(
+              child:  RaisedButton(
                 color: Color(0xff1B1D25),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12.0)),
@@ -114,34 +117,32 @@ class BmiScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 onPressed: () {
-                  Provider.of<BMIModel>(context, listen: false).calculateBMI();
+                  _calculation.calculateBMI();
                 },
-              ),
+              )
             ),
             SizedBox(height: 30),
-            Center(
-              child: Consumer<BMIModel>(
-                builder: ((context, BMIModel, child) {
-                  return Text(
-                    BMIModel.getResult == 0
-                        ? "Hey enter some value"
-                        : "Your BMI is ${BMIModel.getResult.toStringAsFixed(2)}",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 18,
-                      color: Colors.black,
-                    ),
-                  );
-                }),
-              ),
-            ),
+            Center(child: Observer(
+              builder: (context) {
+                return Text(
+                  _calculation.result == 0
+                      ? "Hey enter some value"
+                      : "Your BMI is ${_calculation.result.toStringAsFixed(2)}",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
+                    color: Colors.black,
+                  ),
+                );
+              },
+            )),
             SizedBox(
               height: 20,
             ),
             Center(
-              child: Consumer<BMIModel>(
-                builder: ((context, BMIModel, child) {
-                  return BMIModel.getResult == 0
+              child: Observer(
+                builder: (context) {
+                  return _calculation.result == 0
                       ? const Text(
                           "👋",
                           style: TextStyle(
@@ -150,7 +151,7 @@ class BmiScreen extends StatelessWidget {
                             color: Colors.black,
                           ),
                         )
-                      : BMIModel.getResult < 18.5 && BMIModel.getResult < 24.9
+                      : _calculation.result < 18.5 && _calculation.result < 24.9
                           ? const Text(
                               "You are underweighted😭",
                               style: TextStyle(
@@ -167,7 +168,7 @@ class BmiScreen extends StatelessWidget {
                                 color: Colors.black,
                               ),
                             );
-                }),
+                },
               ),
             ),
           ],
